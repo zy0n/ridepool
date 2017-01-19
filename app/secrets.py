@@ -15,7 +15,7 @@ community = {
 SESSION_KEY = c2xbj60d10l9gd76ts7pfm12wj8q432f
 
 # Google APIs
-GOOGLE_APP_ID = 628022227548-8lt6hfs818rm8uiktbr25662v425kds4.apps.googleusercontent.com
+GOOGLE_APP_ID = ridepool-156022
 GOOGLE_APP_SECRET = a1QDIl-67qbWjrpFtW1eDRb1
 
 # Facebook auth apis
