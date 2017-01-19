@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Ride Details{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/datepicker.css">
+{% endblock %}
+
+{% block main %}
+<div data-notify="container">
+    
+</div>
+<div class="panel panel-main">
+    <div class="panel-heading">Edit Ride</div>
+    <div class="panel-body">
+        <form id='form'>
+            <div class="form-group" data-location='container'>
+                <label>Starting Address</label>
+                <div class="input-group">
+                    <input class="form-control" type="text" placeholder='Address' name='origin_add' required data-location='input'>
+                    <span class="input-group-btn">
+                        <button class="btn btn-info" type="button" data-location='search'>Search Address</button>
+                    </span>
+                </div>
+                <span data-location='error'></span>
+                <div data-location='output' class='hidden'>
+                    <b>Results:</b> <span data-location='address'></span>
+                </div>
+                <div class="help-block">You must search for an address before submitting.</div>
+            </div>
+            <div class="form-group">
+                <label>Passenger seats availible</label>
+                <select class="form-control" name='passengers_max'>
+                    <option value='1'>1</option>
+                    <option value='2'>2</option>
+                    <option value='3'>3</option>
+                    <option value='4'>4</option>
+                    <option value='5'>5</option>
+                    <option value='6'>6</option>
+                    <option value='7'>7</option>
+                    <option value='8'>8</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <div class="input-group date" data-datepicker data-date-format="MM/DD/YYYY">
+                    <input class="form-control date-select" type="text" placeholder="Date" name='date'>
+                    <span class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Time</label>
+                <div class="input-group date" data-time>
+                    <input class="form-control" type="text" placeholder="Time" name='time'>
+                    <span class="input-group-addon">
+                        <i class="fa fa-clock-o"></i>
+                    </span>
+                </div>
+            </div>
+            <div class='form-group'>
+                <label>Are you the person driving this ride? If not, enter the driver's name:</label>
+                <input class='form-control' type="text" name='driven_by' placeholder='Driven by'>
+            </div>
+            <div class="form-group">
+                <label>Additional Details</label>
+                <input class="form-control" type="text" placeholder="Details" name='details'>
+            </div>
+            <button type='submit' class='btn btn-default'>Edit Ride</button>
+            <button type='button' data-ride='delete' class='btn btn-danger pull-right'>Delete Ride</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src='/static/js/push.js'></script>
+<script src='/static/js/location.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/3.0.0/js/bootstrap-datetimepicker.min.js'></script>
+{% raw %}
+<script data-notify="template" type='text/x-handlebars-template'>
+    <div class="alert alert-{{type}} alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <strong>{{strong}}</strong>
+        {{message}}
+    </div>
+</script>
+{% endraw %}
+<script type="text/javascript">
+    $('[data-datepicker]').datetimepicker({
+        pickTime: false,
+        defaultDate: '{{ride_json.date}}'
+    });
+
+    $('[data-time]').datetimepicker({
+        icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar",
+            up: "fa fa-arrow-up",
+            down: "fa fa-arrow-down"
+        },
+        pickDate: false
+    });
+
+    console.log({{ride_json|safe}})
+    var form = document.querySelector('#form');
+
+    var ql_container = document.querySelector('[data-location="container"]');
+    var ql = new QueryLocation(
+        ql_container,
+        {
+            add: {{ride.origin_add | js}},
+            lat: {{ride.origin_lat | js}},
+            lng: {{ride.origin_lng | js}}
+        }
+    );
+
+    var edit_ride = new SubmitForm({
+        form: form,
+        model: {{ride_json|safe}},
+        method: 'POST',
+        route: window.location.pathname,
+        done: function (data) {
+            document.location = '/ride/' + data.id;
+        },
+        fail: function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Ride not edited.',
+                message: 'Try again.'
+            });
+        },
+        libs: [ql]
+    });
+
+    var delete_ride = document.querySelector('[data-ride="delete"]');
+
+    delete_ride.addEventListener('click', function (e) {
+        var request = $.ajax({
+            type: 'POST',
+            url: '/ride/{{ride.key().id()}}/delete',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({
+                delete: true
+            })
+        });
+
+        request.done(function (data) {
+            document.location = '/home';
+        });
+
+        request.fail(function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Ride not deleted.',
+                message: 'Try again.'
+            });
+        });
+    });
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,456 @@
+{% extends "layout.html" %}
+
+{% block title %}Event{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/datepicker.css">
+{% endblock %}
+
+{% block main %}
+
+{% include 'includes/circle_header.html' %}
+
+<div data-notify="container"></div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-main">
+            <div class="panel-heading">Event details</div>
+            <div class="panel-body">
+                <ul class="information">
+                    <li>
+                        <b>Event name:</b> {{event.name}}
+                    </li>
+                    <li>
+                        <b>Location description:</b> {{event.location}}
+                    </li>
+                    {% if event.details %}
+                    <li>
+                        <b>Details:</b> {{event.details}}
+                    </li>
+                    {% endif %}
+                    <li>
+                        <b>Date:</b> {{event.date_str}}
+                    </li>
+                    <li>
+                        <b>Time:</b> {{event.time}}
+                    </li>
+                    <li>
+                        <b>Address:</b> {{event.address}}
+                    </li>
+                </ul>
+                <hr>
+                {% if not has_request %}
+                <button class='btn btn-primary' data-ride='request' data-alt='Requested!'>I need a ride to this event</button>
+                {% endif %}
+                <button class='btn btn-primary' data-toggle='modal' data-target='#offer_ride'>I can offer a ride to this event</button>
+                {% if user.key() == event.creator.key() %}
+                    <a class='btn btn-primary' href='/event/{{event.key().id()}}/edit'>Edit Event</a>
+                {% endif %}
+                <hr>
+                <a href="http://maps.google.com/maps?q={{event.lat}},{{event.lng}}" target="_blank">View on Google Maps</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-main">
+            <div class="panel-heading">
+                Event Location
+            </div>
+            <div class="panel-body map-container-sm">
+                <p>
+                    Distance: <span data-route='distance'></span>
+                </p>
+                <p>
+                    Duration: <span data-route='duration'></span>
+                </p>
+                <div id="map_canvas"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-main">
+            <div class="panel-heading">
+                Rides offered to Event
+                <div class="pull-right">
+                    <a href="#"  data-toggle='modal' data-target='#offer_ride'>
+                        Offer a Ride
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body panel-no">
+                {% if offered %}
+                    {% for ride in offered %}
+                    <div class="list">
+                        <div class="ctx">
+                            <i class="fa fa-car"></i>
+                        </div>
+                        <div class="info">
+                            <div class="title">
+                                <a href="/ride/{{ride.key().id()}}">Offered by {{ride.driver.name}} from {{ride.orig}} to {{ride.dest}}</a>
+                            </div>
+                            <div class="sub">
+                                <div class="tag">
+                                    <i class="fa fa-calendar"></i> {{ride.date}}
+                                </div>
+                                {% if ride.is_driver %}
+                                    <div class="tag">
+                                        <i class="fa fa-automobile"></i> Driver
+                                    </div>
+                                {% elif ride.is_passenger %}
+                                    <div class="tag">
+                                        <i class="fa fa-automobile"></i> Passenger
+                                    </div>
+                                {% endif %}
+                                <div class="tag">
+                                    {{ride.passengers_max}} Seats Offered
+                                </div>
+                                <div class="tag">
+                                    {{ride.seats_availible}} Seats Availible
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="panel-message">
+                        There are no rides going to this event. Create one above.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-main">
+            <div class="panel-heading">
+                Ride Requesters
+                <!-- <div class="pull-right">
+                    <a href="#" data-toggle='modal' data-target='#need_ride'>
+                        Request a Ride
+                    </a>
+                </div> -->
+            </div>
+            <div class="panel-body">
+                {% if requesters %}
+                    {% for requester in requesters %}
+                    <div class="media">
+                        <a href="#" class='pull-left'>
+                            <img src="/user/photo/{{requester.user.key().id()}}" class="media-object" alt="64x64">
+                        </a>
+                        <div class="media-body">
+                            <div class="pull-left">
+                                <h4>
+                                    <a href="/user/{{requester.user.key().id()}}">
+                                        {{requester.user.name_x}}
+                                    </a>
+                                </h4>
+                            </div>
+                            {% if user.key() == requester.user.key() %}
+                            <div class='pull-right'>
+                                <button class='btn btn-danger' data-unrequest='{{requester.key().id()}}'>Unrequest</button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="panel-message">
+                        There are no requesters to this event. Create one above.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="offer_ride" tabindex="-1" role="dialog" aria-aria-hidden="true">
+    <div class="modal-dialog">
+        <form data-send="driver">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">Offer a ride</h4>
+                </div>
+                <div class="modal-body">
+                    <div data-error='driver'></div>
+                    <div class="form-group" data-location='driver'>
+                        <label>Starting Address</label>
+                        <div class="input-group">
+                            <input class="form-control" type="text" placeholder='Address' name='address' required data-location='input'>
+                            <span class="input-group-btn">
+                                <button class="btn btn-info" type="button" data-location='search'>Search Address</button>
+                            </span>
+                        </div>
+                        <span data-location='error'></span>
+                        <div data-location='output' class='hidden'>
+                            <b>Results:</b> <span data-location='address'></span>
+                        </div>
+                        <div class="help-block">You must search for an address before submitting.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Passenger seats availible</label>
+                        <select class="form-control" name='passengers_max' required>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <div class='input-group date' data-datepicker data-date-format="MM/DD/YYYY">
+                            <input class="form-control" type="text" placeholder="Date" name='date' required>
+                            <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Departure Time</label>
+                        <div class="input-group date" data-time='container'>
+                            <input class="form-control" type="text" placeholder="Time" name='time' data-time='input' required>
+                            <span class="input-group-addon">
+                                <i class="fa fa-clock-o"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class='form-group'>
+                        <label>Are you the person driving this ride?</label>
+
+                        <select class="form-control" data-driver='select'>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class='form-group' data-driver='form'>
+                        <label>Enter the driver's name:</label>
+                        <input class='form-control' type="text" name='driven_by' placeholder='Driven by' data-driver='input'>
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Details</label>
+                        <input class="form-control" type="text" placeholder="Details" name='details'>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type='submit'>
+                        Be the Driver
+                    </button>
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class='comments'>
+    <div class="panel panel-main">
+        <div class="panel-heading">Event Discussion</div>
+        <div class="panel-body" data-comment='container'>
+            <form data-comment='form' autocomplete='off'>
+                <div class="form-group">
+                    <label>Comment</label>
+                    <textarea class='form-control' rows='3' name='comment'></textarea>
+                </div>
+                <button type='submit' class='btn btn-primary'>Post Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB15X6ti6tDQUQKjwPCI2zi3XFfxZW3MGM&sensor=false"></script>
+<script src='/static/js/comment.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/3.0.0/js/bootstrap-datetimepicker.min.js'></script>
+
+<script src='/static/js/push.js'></script>
+<script src='/static/js/location.js'></script>
+{% include 'comment.html' %}
+{% raw %}
+<script data-notify="template" type='text/x-handlebars-template'>
+    <div class="alert alert-{{type}} alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <strong>{{strong}}</strong> {{message}}
+    </div>
+</script>
+{% endraw %}
+<script type="text/javascript">
+
+    $('[data-datepicker]').datetimepicker({
+        pickTime: false
+    });
+
+    $('[data-time="container"]').datetimepicker({
+        icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar",
+            up: "fa fa-arrow-up",
+            down: "fa fa-arrow-down"
+        },
+        pickDate: false
+    });
+
+    var comment = new Comment({
+        type: 'event',
+        id: {{event.key().id()}},
+        container: '[data-comment="container"]'
+    });
+
+    /* Map */
+    {% if circle.lat and circle.lng %}
+        var orig_pos = new google.maps.LatLng({{circle.lat}}, {{circle.lng}});
+    {% else %}
+        var orig_pos = new google.maps.LatLng(43.3017, -91.7903);
+    {% endif %}
+    var dest_pos = new google.maps.LatLng({{event.lat}}, {{event.lng}});
+
+    var direction_render = new google.maps.DirectionsRenderer();
+    var direction_service = new google.maps.DirectionsService();
+
+    var icon = {
+        url: '/static/person.png',
+        anchor: new google.maps.Point(20, 20),
+        size: new google.maps.Size(30, 40)
+    };
+
+    var map = new google.maps.Map(document.querySelector('#map_canvas'), {
+        draggableCursor: 'crosshair',
+        center: orig_pos,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        zoom: 10
+    });
+    direction_render.setMap(map);
+
+    function calc_route () {
+        var request = {
+            origin: orig_pos,
+            destination: dest_pos,
+            travelMode: google.maps.TravelMode.DRIVING
+        };
+        direction_service.route(request, function (result, status) {
+            if (status == google.maps.DirectionsStatus.OK) {
+                console.log(result);
+                var duration = document.querySelector('[data-route="duration"]');
+                var distance = document.querySelector('[data-route="distance"]');
+                duration.textContent = result.routes[0].legs[0].duration.text;
+                distance.textContent = result.routes[0].legs[0].distance.text;
+                direction_render.setDirections(result);
+            }
+        });
+    };
+    calc_route();
+    /* End */
+
+    var form_driver = document.querySelector('[data-send="driver"]');
+
+    var ql_container = document.querySelector('[data-location="driver"]');
+    var ql = new QueryLocation(
+        ql_container,
+        {
+            add: '',
+            lat: '',
+            lng: ''
+        }
+    );
+
+    var submit_driver = new SubmitForm({
+        form: form_driver,
+        model: {
+            passengers_max: 1,
+            date: '{{event.date_picker}}',
+            time: moment().format('h:mm A'),
+            details: '',
+            driven_by: '',
+            event: '{{event.key().id()}}',
+            driver: true,
+            recurring: 'false',
+            circle: '{{circle.key().id()}}'
+        },
+        method: 'POST',
+        route: '/ride/create',
+        done: function (data) {
+            document.location = '/ride/' + data.id;
+        },
+        fail: function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Oops',
+                message: 'Refresh and try again',
+                container: '[data-error="driver"]'
+            });
+        },
+        libs: [ql]
+    });
+
+
+
+    var request_ride = document.querySelector('[data-ride="request"]');
+
+    request_ride.addEventListener('click', function (e) {
+        var target = e.target;
+        if (!target.disabled) {
+            var req = $.ajax({
+                type: 'POST',
+                url: '/event/{{event.key().id()}}/request',
+                dataType: 'json',
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify({
+                    user: '{{user.key().id()}}'
+                })
+            });
+
+            req.done(function (data) {
+                document.location = '/event/' + data.id;
+            });
+        }
+    });
+
+    var if_driving = {
+        form: document.querySelector('[data-driver="form"]'),
+        select: document.querySelector('[data-driver="select"]'),
+        input: document.querySelector('[data-driver="input"]')
+    }
+
+    if_driving.form.classList.add('hidden');
+
+    if_driving.select.addEventListener('change', function (e) {
+        var target = e.target;
+
+        if (target.value == 'no') {
+            if_driving.form.classList.remove('hidden');
+        } else {
+            if_driving.form.classList.add('hidden');
+            if_driving.input.value = '';
+        }
+    });
+
+    document.body.addEventListener('click', function (e) {
+        var target = e.target;
+
+        if (target.dataset.unrequest) {
+            var req = $.ajax({
+                type: 'POST',
+                url: '/event/{{event.key().id()}}/unrequest',
+                dataType: 'json',
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify({
+                    id: target.dataset.unrequest
+                })
+            });
+
+            req.done(function (data) {
+                document.location = '/event/' + data.id;
+            });
+        }
+    });
+</script>
+{% endblock %}

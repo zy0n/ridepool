@@ -1,0 +1,307 @@
+{% extends "layout.html" %}
+
+{% block title %}Circle{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block main %}
+
+{% include 'includes/circle_header.html' %}
+
+<div data-notify="container"></div>
+{% if invite %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        You have been invited to this circle by {{invite.sender.name}}.
+        Visit the <a href='/circles'>circles page</a> to accept the invite.
+    </div>
+</div>
+{% endif %}
+
+<div data-route="details">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-main">
+                <div class="panel-heading">
+                    Events
+                    <div class="pull-right">
+                        <a class='btn btn-xs btn-primary' href="/circle/{{circle.key().id()}}/map?events=true">
+                            Create Events
+                        </a>
+                        <a class='btn btn-xs btn-success'
+                            data-toggle="collapse"
+                            data-cbtn="open"
+                            data-target="[data-collapse='events']">
+                            Collapse
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body panel-no  collapse in" data-collapse='events'>
+                {% if events_all %}
+                    {% for event in events_all %}
+                        <div class="list">
+                            <div class="ctx">
+                                <i class="fa fa-location-arrow"></i>
+                            </div>
+                            <div class="info">
+                                <div class="title">
+                                    <a href="/event/{{event.key().id()}}">{{event.name}}</a>
+                                </div>
+                                <div class="sub">
+                                    <div class="tag">
+                                        <i class="fa fa-calendar"></i>
+                                        {{event.date}}
+                                    </div>
+                                    <div class="tag">
+                                        <i class="fa fa-location-arrow"></i>
+                                        {{event.address}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="panel-message">
+                        There are no events yet. Visit <a href="/circle/{{circle.key().id()}}/map">the map</a> to create one.
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-main">
+                <div class="panel-heading">
+                    <span>
+                        Notifications - Messages from {{circle.name}}
+                    </span>
+                    <div class="pull-right">
+                        <a class='btn btn-xs btn-success'
+                            data-toggle="collapse"
+                            data-cbtn="open"
+                            data-target="[data-collapse='notis']">
+                            Collapse
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body collapse in" data-collapse='notis'>
+                {% if site_notis %}
+                    {% for sn in site_notis %}
+                        <div class="list noti">
+                            <div class="ctx">
+                                <i class="fa fa-{{sn.symbol}}"></i>
+                            </div>
+                            <div class="info">
+                                <div class="title">
+                                    <b>{{sn.title}}</b>
+                                    <p>{{sn.message | safe}}</p>
+                                </div>
+                            </div>
+                            <div class="dismiss" data-dismiss="{{sn.id}}">
+                                <i class="fa fa-times" data-child='true'></i>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% else %}
+                        <div class="panel-message">
+                            You do not have any notifications.
+                        </div>
+                {% endif %}
+                </div>
+            </div>
+            <div class="panel panel-main">
+                <div class="panel-heading">
+                    Members of Circle <!-- ({{total_members}} Members) -->
+                    <div class="pull-right">
+                        <a class='btn btn-xs btn-link' href="/circle/{{circle.key().id()}}/invite">
+                            Invite Friends
+                        </a>
+                        {% if is_admin %}
+                        <a class='btn btn-xs btn-link' href="/circle/{{circle.key().id()}}/requests">
+                            Requests
+                        </a>
+                        {% endif %}
+                        <a class='btn btn-xs btn-success'
+                            data-toggle="collapse"
+                            data-cbtn="open"
+                            data-target="[data-collapse='members']">
+                            Collapse
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body collapse in" data-collapse='members'>
+                {% if admins %}
+                {% for member in admins %}
+                    <div class="media">
+                        <a href="#" class='pull-left'>
+                            <img src="/user/photo/{{member.key().id()}}" class="media-object" alt="64x64">
+                        </a>
+                        <div class="media-body">
+                            <div class="pull-left">
+                                <h4>
+                                    <a href="/user/{{member.key().id()}}">{{member.name_x}}</a>
+                                </h4>
+                            </div>
+                            {% if is_admin %}
+                            <div class="pull-right">
+                                <div class="options">
+                                    <!-- <button class='btn btn-danger' data-kick='{{member.key().id()}}'>Kick Member</button> -->
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                {% endif %}
+                {% for member in members %}
+                    {% if member.key() not in circle.admins %}
+                    <div class="media">
+                        <a href="#" class='pull-left'>
+                            <img src="/user/photo/{{member.key().id()}}" class="media-object" alt="64x64">
+                        </a>
+                        <div class="media-body">
+                            <div class="pull-left">
+                                <h4>
+                                    <a href="/user/{{member.key().id()}}">
+                                        {{member.name_x}}
+                                    </a>
+                                </h4>
+                            </div>
+                            {% if is_admin %}
+                            <div class="pull-right">
+                                <div class="options">
+                                    {% if member.key() not in circle.admins %}
+                                        <button class='btn btn-success' data-promote='{{member.key().id()}}'>Promote to Manager</button>
+                                        <button class='btn btn-danger' data-kick='{{member.key().id()}}'>Remove Member</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="send-message" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form data-form='message'>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">Send Message</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Message text</label>
+                    <textarea class='form-control' name='message' rows='3'></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-default">Send Message</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src='/static/js/push.js'></script>
+<script type="text/javascript">
+    var change_text = function (e) {
+        var target = e.target;
+        if (target.dataset.cbtn == 'open') {
+            target.textContent = 'Expand';
+            target.dataset.cbtn = 'closed';
+        } else {
+            target.textContent = 'Collapse';
+            target.dataset.cbtn = 'open';
+        }
+    };
+
+    var collapse_btns = document.querySelectorAll('[data-cbtn]');
+
+    for (var btn of collapse_btns) {
+        btn.addEventListener('click', change_text);
+    }
+
+    var send_req = function (ele) {
+        var push = $.ajax({
+            type: 'POST',
+            url: '/alert/dismiss',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({
+                id: ele.dataset.dismiss
+            })
+        });
+
+        push.done(function (data) {
+            ele.parentNode.parentNode.removeChild(ele.parentNode);
+        });
+
+        push.fail(function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Whoops',
+                message: 'Alert does not exist.'
+            });
+        });
+    };
+
+    document.addEventListener('click', function (e) {
+        var target = e.target;
+        if (target.dataset.child) {
+            target = target.parentNode;
+        }
+
+        if (target.dataset.dismiss) {
+            send_req(target);
+        }
+        if (target.dataset.promote) {
+            var request = $.ajax({
+                type: 'POST',
+                url: '/circle/{{circle.key().id()}}/promote',
+                dataType: 'json',
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify({
+                    'user': target.dataset.promote
+                })
+            });
+
+            request.done(function (data) {
+                document.location = '/circle/{{circle.key().id()}}';
+            });
+
+            request.fail(function (data, status) {
+                notify({
+                            type: 'danger',
+                            strong: 'Member not promoted.',
+                            message: 'Try again.'
+                        });
+            });
+        }
+    });
+
+
+</script>
+{% raw %}
+<script data-notify="template" type='text/x-handlebars-template'>
+    <div class="alert alert-{{type}} alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <strong>{{strong}}</strong> {{message}}
+    </div>
+</script>
+{% endraw %}
+{% endblock %}

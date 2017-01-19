@@ -1,0 +1,179 @@
+{% extends "marketing/layout.html" %}
+
+{% block title %}Ridecircles{% endblock %}
+
+{% block main %}
+    {% if invite %}
+    <div class="invite">
+        <h1>You have been invited to Ridecircles.</h1>
+        <p class="lead">You have been asked to join the {{invite.name}} circle. Please login or register.</p>
+            <a href="/login" class="btn btn-xl">Login</a>
+            <a href="/login" class="btn btn-xl">Register</a>
+        </div>
+    </div>
+    {% endif %}
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="intro-text">
+                <!-- <div class="intro-lead-in">Ridecircles</div> -->
+                <div class="intro-heading">Ride Sharing. Your Way.</div>
+                <a href="#why_ridecircles" class="page-scroll btn btn-xl">Tell Me More</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="why_ridecircles">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">Who are Ridecircles for?</h2>
+                    <h3 class="section-subheading text-muted">Circles are for existing social groups</h3>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <span class="fa-stack fa-4x">
+                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fa fa-star fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <h4 class="service-heading">Teams & Clubs</h4>
+                    <p class="text-muted">Create a circle for your team and easily organize rides to your events</p>
+                </div>
+                <div class="col-md-4">
+                    <span class="fa-stack fa-4x">
+                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fa fa-building-o fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <h4 class="service-heading">Employers & Workplaces</h4>
+                    <p class="text-muted">Simplify commuting or fleet management by creating a circle</p>
+                </div>
+                <div class="col-md-4">
+                    <span class="fa-stack fa-4x">
+                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fa fa-user fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <h4 class="service-heading">Your Group</h4>
+                    <p class="text-muted">There are limitless possibilites. Where have you recently wished your could share a ride with someone?</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <hr>
+    </div>
+
+    <section id='why-rc'>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">Why Ridecircles?</h2>
+                    <h3 class="section-subheading text-muted"></h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="/static/icons/efficient_3722.png" class='split-image' alt="">
+                </div>
+                <div class="col-md-8">
+                    <h3>Convenient</h3>
+                    <p>It is common that we find ourselves asking why do we drive to that place everyday. Ridecircles are meant for people who commonly go to the same place so it is easy to share.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="/static/icons/company_60848.png" class='split-image' alt="">
+                </div>
+                <div class="col-md-8">
+                    <h3>Safe</h3>
+                    <p>Ridecircles are for existing social networks: you know each other, and circles can be private or even invisible.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="/static/icons/manage_43248.png" class='split-image' alt="">
+                </div>
+                <div class="col-md-8">
+                    <h3>Easy</h3>
+                    <p>Manage your group with one site: invites, events, messages, and more!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <hr>
+    </div>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">How to use Ridecircles</h2>
+                    <h3 class="section-subheading text-muted">It is pretty simple.</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <ul class="timeline">
+                        <li>
+                            <div class="timeline-image">
+                                <img src="/static/icons/become_member.png">
+                            </div>
+                            <div class="timeline-panel">
+                                <div class="timeline-heading">
+                                    <h4>Become a member of Ridecircles.us</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <p>Account identity is important to fellow circle memebers, log in can use Google, Facebook, and more.</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="timeline-inverted">
+                            <div class="timeline-image">
+                                <img src="/static/icons/search_rides.png">
+                            </div>
+                            <div class="timeline-panel">
+                                <div class="timeline-heading">
+                                    <h4>Join or create circles</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <p>It's easy to do, no ridesharing required, and easy to leave if you choose.</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="timeline-image">
+                                <img src="/static/icons/find_circles.png">
+                            </div>
+                            <div class="timeline-panel">
+                                <div class="timeline-heading">
+                                    <h4>Share Rides & Events</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <p>Create events, offer and join rides with a few quick clicks. Find the rides that are most convient for you.</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="timeline-inverted">
+                            <div class="timeline-image">
+                                <img src="/static/icons/enjoy.png">
+                            </div>
+                            <div class="timeline-panel">
+                                <div class="timeline-heading">
+                                    <h4>Be Happy!</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <p>Enjoy each other's company, save some dough, be kind to the planet, and take a little hassle out of your life - doesn't that make you feel good?</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

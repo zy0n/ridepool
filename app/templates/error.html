@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}404{% endblock %}
+
+{% block main %}
+<div data-notify="container"></div>
+<div class="panel panel-main">
+    <div class="panel-heading">Error</div>
+    <div class="panel-body">
+        {{error_message}}
+    </div>
+</div>
+{% endblock %}

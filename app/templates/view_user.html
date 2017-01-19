@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}User{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block main %}
+<div data-notify="container"></div>
+<div class="panel panel-main">
+    <div class="panel-heading">User details</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-3">
+                <img src="/user/photo/{{user.key().id()}}" class='img-rounded'>
+                <h1>{{user.name_x}}</h1>
+                <p class="lead">{{user.email}}</p>
+            </div>
+            <div class="col-md-9">
+                <ul class='information'>
+                    <li>
+                        <b>Name: </b> {{user.name_x}}
+                    </li>
+                    <li>
+                        <b>Email:</b> <a href='mailto:{{user.email}}'>{{user.email}}</a>
+                    </li>
+                    <li>
+                        <b>Phone:</b> {{user.phone}}
+                    </li>
+                    <li>
+                        <b>Member since:</b> {{user.created_str}}
+                    </li>
+                    <li>
+                        <b>Home Address:</b> {{user.address}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        {% if is_user %}
+            <a href='/user/edit/{{user.key().id()}}' class='btn btn-primary'>Edit Profile</a>
+            <a href="/user/edit/{{user.key().id()}}/pref" class='btn btn-primary'>Email Preferences</a>
+            <!-- <a href="/user/notification/{{user.key().id()}}" class='btn btn-primary'> Notification settings</a> -->
+            <a href="/signout" class='btn btn-primary'>Sign Out</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class='comments'>
+    <div class="panel panel-main">
+        <div class="panel-heading">Comments</div>
+        <div class="panel-body" data-comment='container'>
+            <form data-comment='form' autocomplete='off'>
+                <div class="form-group">
+                    <label>Comment</label>
+                    <textarea class='form-control' rows='3' name='comment'></textarea>
+                </div>
+                <button type='submit' class='btn btn-primary'>Post Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src='/static/js/comment.js'></script>
+{% include 'comment.html' %}
+{% raw %}
+<script data-notify="template" type='text/x-handlebars-template'>
+    <div class="alert alert-{{type}} alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <strong>{{strong}}</strong> {{message}}
+    </div>
+</script>
+{% endraw %}
+<script type="text/javascript">
+var comment = new Comment({
+    type: 'profile',
+    id: {{user.key().id()}},
+    container: '[data-comment="container"]'
+});
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+<div class="circle-hero">
+	<div class="title">
+	    <h1>{{circle.name}}</h1>
+	    <h4>{{circle.description}}</h4>
+    </div>
+    {% if is_admin %}
+        <a class="btn btn-primary" href='/circle/{{circle.key().id()}}/edit'>Manage Circle</a>
+        <a class="btn btn-primary" href="/circle/{{circle.key().id()}}/message">Send message to all circle members</a>
+    {% endif %}
+</div>

@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Ride Details{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block main %}
+<div data-notify="container">
+    
+</div>
+<div class="panel panel-main">
+    <div class="panel-heading">Edit Circle</div>
+    <div class="panel-body">
+        <form data-circle='edit'>
+            <div class='form-group'>
+                <label>Name</label>
+                <input type='text' name='name' placeholder='Name' class='form-control'>
+            </div>
+            <div class="form-group" data-location='base'>
+                <label>Home Base Address</label>
+                <div class="input-group">
+                    <input class="form-control" type="text" placeholder='Address' name='address' required data-location='input'>
+                    <span class="input-group-btn">
+                        <button class="btn btn-info" type="button" data-location='search'>Search Address</button>
+                    </span>
+                </div>
+                <span data-location='error'></span>
+                <div data-location='output' class='hidden'>
+                    <b>Results:</b> <span data-location='address'></span>
+                </div>
+                <div class="help-block">You must search for an address before submitting.</div>
+            </div>
+            <div class='form-group'>
+                <label>Description</label>
+                <input type='text' name='description' placeholder='Description' class='form-control'>
+            </div>
+            <div class="form-group">
+                <label>Privacy</label>
+                <select class='form-control' name='privacy'>
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                    <option value="invisible">Invisible</option>
+                </select>
+                <p class="help-block">Public circles are visible to everyone. Private groups are invite only.</p>
+            </div>
+            <div class="form-group">
+                <label>Who can create events?</label>
+                <select class='form-control' name='permission'>
+                    <option value="anyone">Anyone in circle</option>
+                    <option value="admins">Only admins</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Color</label>
+                <select class='form-control' name='color'>
+                    <option value="#5677fc">Blue</option>
+                    <option value="#ff9800">Orange</option>
+                    <option value="#259b24">Green</option>
+                    <option value="#e51c23">Red</option>
+                    <option value="#009688">Teal</option>
+                </select>
+                <p class="help-block">Select a color for your circles so users will be able to identify and distinguish it easier.</p>
+            </div>
+            <button type='submit' class='btn btn-primary'>Edit Circle</button>
+            <button type='button' class='btn btn-danger pull-right' data-circle='delete'>Delete Circle & All Associated Rides and Event</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src='/static/js/push.js'></script>
+<script src='/static/js/location.js'></script>
+{% raw %}
+<script data-notify="template" type='text/x-handlebars-template'>
+    <div class="alert alert-{{type}} alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <strong>{{strong}}</strong>
+        {{message}}
+    </div>
+</script>
+{% endraw %}
+<script type="text/javascript">
+    var form = document.querySelector('[data-circle="edit"]');
+
+    var ql_container = document.querySelector('[data-location="base"]');
+    var ql = new QueryLocation(
+        ql_container,
+        {
+            add: {{circle.address | js}},
+            lat: {{circle.lat | js}},
+            lng: {{circle.lng | js}}
+        }
+    );
+
+    var push = new SubmitForm({
+        form: form,
+        model: {{circle_json|safe}},
+        method: 'POST',
+        route: '/circle/{{circle.key().id()}}/edit',
+        done: function (data) {
+            document.location = '/circle/' + data.id;
+        },
+        fail: function (message, status) {
+            notify({
+                type: 'danger',
+                strong: 'Sorry!',
+                message: 'The circle was not edited. Please try again.'
+            });
+        },
+        libs: [ql]
+    });
+
+
+
+    var delete_circle = document.querySelector('[data-circle="delete"]');
+
+    delete_circle.addEventListener('click', function (e) {
+        var req = $.ajax({
+            type: 'POST',
+            url: '/circle/{{circle.key().id()}}/delete',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({
+                delete: true
+            })
+        });
+
+        req.done(function (data) {
+            document.location = '/home';
+        });
+
+        req.fail(function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Error.',
+                message: 'This circle could not be deleted. Please try again.'
+            });
+        });
+    });
+</script>
+{% endblock %}

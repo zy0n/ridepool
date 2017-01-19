@@ -1,0 +1,27 @@
+{% raw %}
+<script data-comment='template' type='text/x-handlebars-template'>
+    <div class="media">
+        <a class="pull-left" href="#">
+            <img src="/user/photo/{{user.id}}" class="media-object img-circle" alt="64x64">
+        </a>
+        <div class="media-body">
+            <h4 class="media-heading">
+                <a href='/user/{{user.id}}'>
+                    {{user.name_x}}
+                </a>
+            </h4>
+            {{text}}
+        </div>
+        <span class="label label-success">Posted on {{date}}</span>
+        {{#if is_owner}}
+            <a href='/comment/{{id}}'>
+                <span class='label label-primary'>Edit Comment</span>
+            </a>
+            <a href='/comment/{{id}}'>
+                <span class='label label-danger'>Delete Comment</span>
+            </a>
+        {{/if}}
+    </div>
+    <hr>
+</script>
+{% endraw %}

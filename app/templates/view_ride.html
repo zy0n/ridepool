@@ -1,0 +1,342 @@
+{% extends "layout.html" %}
+
+{% block title %}Ride{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block main %}
+
+{% include 'includes/circle_header.html' %}
+
+<div data-notify="container">
+    
+</div>
+{% if ride.driver == None %}
+    <div class="panel panel-default">
+        <div class="panel-body">
+            This ride does not have a driver yet.
+        </div>
+    </div>
+{% endif %}
+{% if similar_rides %}
+    <div class="panel panel-main">
+        <div class="panel-heading">
+            Similar Rides
+        </div>
+        <div class="panel-body panel-no">
+            {% for sr in similar_rides %}
+                <div class="list">
+                    <div class="ctx">
+                        <i class="fa fa-exclamation"></i>
+                    </div>
+                    <div class="info">
+                        <div class="title">
+                            You are the passenger of another ride going to this event. If this happened mistankely, please visit <a href='/ride/{{sr}}'>that ride</a> and leave as a passenger. 
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-main">
+            <div class="panel-heading">Ride details</div>
+            <div class="panel-body">
+                <ul class='information'>
+                    <li>
+                        <b>Starting point: </b> {{ride.origin_add}}
+                    </li>
+                    <li>
+                        <b>Destination:</b> {{ride.dest_add}}
+                    </li>
+                    <li>
+                        <b>Date:</b> {{ride.date_str}}
+                    </li>
+                    <li>
+                        <b>Departure Time:</b> {{ride.time}}
+                    </li>
+                    {% if ride.driver %}
+                        <li>
+                            <b>Availible seats:</b> {{seats}}
+                        </li>
+                        <li>
+                            <b>Offered by:</b> <a href="/user/{{ride.driver.key().id()}}">{{ride.driver.name}}</a>
+                        </li>
+                        <li>
+                            <b>Driven by:</b>
+                            {% if ride.driven_by == None or ride.driven_by == '' %}
+                                {{ride.driver.name}}
+                            {% else %}
+                                {{ride.driven_by}}
+                            {% endif %}
+                        </li>
+                        <li>
+                            <b>Driver contact:</b> {{ride.driver.email}}
+                        </li>
+                    {% endif %}
+                    <li>
+                        <b>Passengers:</b>
+                        {% if passengers %}
+                            {% for p in passengers %}
+                                <div class='chip'>
+                                    <div class="pull-left">
+                                        <i class="fa fa-user"></i>
+                                        <a href='/user/{{p.user.key().id()}}'>{{p.user.name_x}}</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        Has {{p.seats}} Seats
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No passengers</p>
+                        {% endif %}
+                    </li>
+
+                    {% if ride.circle %}
+                        <li>
+                            <b>Circle:</b> <a href="/circle/{{ride.circle.key().id()}}">{{ride.circle.name}}</a>
+                        </li>
+                    {% endif %}
+                    {% if ride.event %}
+                        <li>
+                            <b>Event:</b> <a href="/event/{{ride.event.key().id()}}">{{ride.event.name}}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <hr>
+                <div class="options">
+                    {% if ride.is_driver or ride.can_edit %}
+                        <a href="/ride/{{ride.key().id()}}/edit" class='btn btn-primary'>Edit ride details</a>
+                        <p class="help-block">You are currently the driver.</p>
+                        <button class='btn btn-danger' data-driver='leave'>Leave ride</button>
+                    {% endif %}
+
+                    {% if ride.need_driver %}
+                         <button class='btn btn-success' data-toggle='modal' data-target='#join_driver'>Be the driver</button>
+                    {% endif %}
+
+                    {% if ride.is_pass %}
+                        <p class="help-block">You are currently a passenger.</p>
+                        <button class='btn btn-danger' data-passenger='leave'>Leave ride</button>
+                    {% endif %}
+
+                    {% if ride.can_pass %}
+                        <button class='btn btn-success' data-toggle='modal' data-target='#join_passenger'>Join as Passenger</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-main">
+            <div class="panel-heading">
+                Ride Map
+            </div>
+            <div class="panel-body map-container-sm">
+                <div id="map_canvas"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class='comments'>
+    <div class="panel panel-main">
+        <div class="panel-heading">Ride Discussion</div>
+        <div class="panel-body" data-comment='container'>
+            <form data-comment='form' autocomplete='off'>
+                <div class="form-group">
+                    <label>Comment</label>
+                    <textarea class='form-control' rows='3' name='comment'></textarea>
+                </div>
+                <button type='submit' class='btn btn-primary'>Post Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="join_driver" tabindex="-1" role="dialog" aria-aria-hidden="true">
+    <div class="modal-dialog">
+        <form data-send="driver">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">Drive this ride</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Max Passengers</label>
+                        <select class="form-control" name='max_passengers'>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input class="form-control" type="text" placeholder="Time" name='time'>
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Details</label>
+                        <input class="form-control" type="text" placeholder="Details" name='details'>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type='submit'>
+                        Be the Driver
+                    </button>
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="join_passenger" tabindex="-1" role="dialog" aria-aria-hidden="true">
+    <div class="modal-dialog">
+        <form data-send="passenger">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">Join as Passenger</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Claim Seats</label>
+                        <select class="form-control" name='seats_claimed'>
+                        {% for n in range(1, seats + 1) %}
+                            <option>{{n}}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea name="message" class="form-control"></textarea>
+                        <div class="help-block">
+                            Please tell the driver who the riders are.
+                        </div>
+                    </div>
+                    <div class="help-block">
+                            Please be considerate of the sharing nature of Ridecircles. Offer to contribute to ride costs such as gas money when you meet for your ride.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type='submit'>
+                        Join as Passenger
+                    </button>
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endblock %}
+
+{% block scripts %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB15X6ti6tDQUQKjwPCI2zi3XFfxZW3MGM&sensor=false"></script>
+<script src="/static/js/push.js"></script>
+<script src='/static/js/comment.js'></script>
+<script src='/static/js/ride_handler.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/js/bootstrap.js'></script>
+{% include 'comment.html' %}
+{% raw %}
+<script data-notify="template" type='text/x-handlebars-template'>
+    <div class="alert alert-{{type}} alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <strong>{{strong}}</strong> {{message}}
+    </div>
+</script>
+{% endraw %}
+<script type="text/javascript">
+    var comment = new Comment({
+        type: 'ride',
+        id: {{ride.key().id()}},
+        container: '[data-comment="container"]'
+    });
+
+    /* Context Map */
+    var orig_latlng = new google.maps.LatLng({{ride.origin_lat}}, {{ride.origin_lng}});
+
+    var dest_latlng = new google.maps.LatLng({{ride.dest_lat}}, {{ride.dest_lng}});
+
+    var direction_render = new google.maps.DirectionsRenderer();
+    var direction_service = new google.maps.DirectionsService();
+
+    var map = new google.maps.Map(document.querySelector('#map_canvas'), {
+        draggableCursor: 'crosshair',
+        center: orig_latlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        zoom: 7
+    });
+    direction_render.setMap(map);
+
+    function calc_route () {
+        var request = {
+            origin: orig_latlng,
+            destination: dest_latlng,
+            travelMode: google.maps.TravelMode.DRIVING
+        };
+        direction_service.route(request, function (result, status) {
+            if (status == google.maps.DirectionsStatus.OK) {
+                direction_render.setDirections(result);
+            }
+        });
+    };
+    calc_route();
+    /* End */
+
+    var driver_form = document.querySelector('[data-send="driver"]');
+
+    var be_driver = new SubmitForm({
+        form: driver_form,
+        model: {
+            details: '',
+            time: '',
+            max_passengers: ''
+        },
+        method: 'POST',
+        route: '/ride/{{ride.key().id()}}/driver',
+        done: function (data) {
+            document.location.reload(true);
+        },
+        fail: function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Oops',
+                message: 'Refresh and try again'
+            });
+        }
+    });
+
+    var passenger_form = document.querySelector('[data-send="passenger"]');
+    var be_passenger = new SubmitForm({
+        form: passenger_form,
+        model: {
+            seats_claimed: '',
+            message: ''
+        },
+        method: 'POST',
+        route: '/ride/{{ride.key().id()}}/passenger',
+        done: function (data) {
+            document.location.reload(true);
+        },
+        fail: function (data, status) {
+            notify({
+                type: 'danger',
+                strong: 'Oops',
+                message: 'Refresh and try again'
+            });
+        }
+    });
+
+</script>
+{% endblock %}

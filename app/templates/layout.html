@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>{% block title %}{% endblock %} - Rideshare</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+	<link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	
+
+	<meta charset="utf-8">
+	<meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport">
+
+	<link rel="shortcut icon" sizes="1024x1024" href="/static/img/marker.png">
+	<link rel="shortcut icon" sizes="128x128" href="/static/img/marker.png">
+	<link rel="apple-touch-icon" sizes="1024x1024" href="/static/img/marker.png">
+	<link rel="apple-touch-icon-precomposed" sizes="1024x1024" href="/static/marker.png">
+
+	{% block head %}
+	{% endblock %}
+
+	<link rel="stylesheet" type="text/css" href="/static/css/styles.css">
+</head>
+<body>
+	{% if user is defined %}
+	<div id="sidebar-wrapper" data-pull='wrapper'>
+		<div class="splash-icon">
+			<a href="/home"></a>
+		</div>
+		<div class="pull-out active" data-pull="out">
+			<i class="fa fa-toggle-right"></i>
+		</div>
+		<div class="pull-in" data-pull="in">
+			<i class="fa fa-toggle-left"></i>
+		</div>
+		<ul class="sidebar" data-pull='bar'>
+		{% if user.circles %}
+			<li class="sidebar-title separator first beta-warning">
+				BETA. Please bear with us.
+			</li>
+			<li class="sidebar-title separator first beta-warning">
+				Email <a href='mailto:nelsan06@luther.edu,kayla@energydistrict.org'>developer</a> with issues.
+			</li>
+			<li class="sidebar-title separator">
+				<span>MY CIRCLES</span>
+			</li>
+			{% for circle in circle_list %}
+			<li class='sidebar-list dropdown menu-option'>
+				<!-- <div class=""> -->
+					<a href="/circle/{{circle.key().id()}}" class='link'>{{circle.name}}</a>
+					<div data-toggle="dropdown" class="dropdown-toggle down">
+						<i class="fa fa-caret-down"></i>
+					</div>
+				<!-- </div> -->
+
+				<ul class="dropdown-menu" role="menu">
+					<li>
+						<a href="/circle/{{circle.key().id()}}/map?events=true">
+							Create an Event
+						</a>
+					</li>
+					<!-- <li>
+						<a href="/circle/{{circle.key().id()}}/rides">
+							Rides
+						</a>
+					</li> -->
+					{% if user.key() in circle.admins %}
+					<li>
+						<a href="/circle/{{circle.key().id()}}/requests">
+							Requests
+						</a>
+					</li>
+					{% endif %}
+				</ul>
+			</li>
+			{% endfor %}
+
+		{% endif %}
+			<!-- <hr> -->
+			<li class="sidebar-list border-top">
+				<a href="/home">
+					My Dashboard
+					<span class="menu-icon fa fa-home"></span>
+				</a>
+			</li>
+			<!-- <li class="sidebar-list">
+				<a href="/rides">
+					My Rides
+					<span class='menu-icon fa fa-car'></span>
+				</a>
+			</li> -->
+			<li class="sidebar-list">
+				<a href="/calendar">
+					Ride Calendar
+					<span class='menu-icon fa fa-calendar'></span>
+				</a>
+			</li>
+			<li class="sidebar-list">
+				<a href="/circles">
+					Join Circles
+					<span class="menu-icon fa fa-plus-square-o"></span>
+				</a>
+			</li>
+			<li class="sidebar-list">
+				<a href="/newCircle">
+					Create Circles
+					<span class="menu-icon fa fa-plus"></span>
+				</a>
+			</li>
+			<li class="sidebar-list">
+				<a href="/signout">
+					Signout
+					<span class="menu-icon fa fa-user"></span>
+				</a>
+			</li>
+		</ul>
+	</div>
+	{% endif %}
+    
+
+	{% block wide %}{% endblock %}
+	<div class="container" id='main_container'>
+		{% block main %}{% endblock %}
+	</div>
+
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.min.js"></script>
+	<script src="/static/js/notify.js"></script>
+	<script src="/static/js/augment.js"></script>
+	<script>
+		var None = '';
+		$('#tooltip-trial').tooltip({
+			placement: 'right',
+			title: 'Click to select',
+			delay: {
+				show: 100,
+				hide: 500
+			}
+		});
+		$(function () {
+			var page_short = location.pathname.split("/")[1];
+			var page_long = location.pathname;
+			$('#sidebar-wrapper a[href="' + page_long + '"]').addClass('active');
+
+			var circle2_switcher = document.querySelector('[data-cwitch="li"]');
+			if (circle2_switcher) {
+				switch (page_short) {
+					case 'home':
+					case 'user':
+					case 'circles':
+					case 'newCircle':
+						circle2_switcher.classList.add('inactive');
+						break;
+				}
+			}
+		});
+
+		var cwitch = {
+			container: document.querySelector('[data-cwitch="container"]'),
+			caret: document.querySelector('[data-cwitch="caret"]')
+		};
+
+		if (cwitch.caret) {
+			cwitch.caret.addEventListener('click', function (e) {
+				e.preventDefault();
+				cwitch.container.classList.toggle('active');
+				cwitch.caret.classList.toggle('fa-caret-down');
+				cwitch.caret.classList.toggle('fa-caret-up');
+			});
+		}
+
+		var pull = {
+			in: document.querySelector('[data-pull="in"]'),
+			out: document.querySelector('[data-pull="out"]'),
+			bar: document.querySelector('[data-pull="bar"]'),
+			wrapper: document.querySelector('[data-pull="wrapper"]'),
+			act: function (e) {
+				pull.in.classList.toggle('active');
+				pull.out.classList.toggle('active');
+				pull.bar.classList.toggle('active');
+				pull.wrapper.classList.toggle('expand');
+			}
+		};
+
+		pull.in.addEventListener('click', pull.act);
+		pull.out.addEventListener('click', pull.act);
+	
+	</script>
+	{% block scripts %}
+	{% endblock %}
+</body>
+</html>
