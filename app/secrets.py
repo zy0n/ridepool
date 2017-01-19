@@ -19,12 +19,12 @@ GOOGLE_APP_ID = '628022227548-q17j4kp7r914eomjmnqkcogd8nirceva.apps.googleuserco
 GOOGLE_APP_SECRET = 'RLdzy35nWbvcOD1elzYKmXWS'
 
 # Facebook auth apis
-FACEBOOK_APP_ID = null
-FACEBOOK_APP_SECRET = null
+FACEBOOK_APP_ID = ''
+FACEBOOK_APP_SECRET = ''
 
 # https://dev.twitter.com/apps
-TWITTER_CONSUMER_KEY = null
-TWITTER_CONSUMER_SECRET = null
+TWITTER_CONSUMER_KEY = ''
+TWITTER_CONSUMER_SECRET = ''
 
 
 # config that summarizes the above
