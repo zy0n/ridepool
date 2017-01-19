@@ -12,11 +12,11 @@ community = {
 # Get 'a random and long string' from here:
 # http://clsc.net/tools/random-string-generator.php
 # or execute this from a python shell: import os; os.urandom(64)
-SESSION_KEY = c2xbj60d10l9gd76ts7pfm12wj8q432f
+SESSION_KEY = 'c2xbj60d10l9gd76ts7pfm12wj8q432f'
 
 # Google APIs
-GOOGLE_APP_ID = ridepool-156022
-GOOGLE_APP_SECRET = a1QDIl-67qbWjrpFtW1eDRb1
+GOOGLE_APP_ID = '628022227548-q17j4kp7r914eomjmnqkcogd8nirceva.apps.googleusercontent.com'
+GOOGLE_APP_SECRET = 'RLdzy35nWbvcOD1elzYKmXWS'
 
 # Facebook auth apis
 FACEBOOK_APP_ID = null
