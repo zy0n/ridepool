@@ -19,12 +19,12 @@ GOOGLE_APP_ID = ridepool-156022
 GOOGLE_APP_SECRET = a1QDIl-67qbWjrpFtW1eDRb1
 
 # Facebook auth apis
-FACEBOOK_APP_ID =
-FACEBOOK_APP_SECRET =
+FACEBOOK_APP_ID = null
+FACEBOOK_APP_SECRET = null
 
 # https://dev.twitter.com/apps
-TWITTER_CONSUMER_KEY =
-TWITTER_CONSUMER_SECRET =
+TWITTER_CONSUMER_KEY = null
+TWITTER_CONSUMER_SECRET = null
 
 
 # config that summarizes the above
